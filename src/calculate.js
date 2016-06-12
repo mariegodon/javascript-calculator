@@ -1,41 +1,30 @@
 function calculator(someString) {
-    
-    var stringArr = toNumStringArray(someString);
 
-    //locate first open bracket in array
-    var openBracket = stringArr.indexOf('(');
-    while (openBracket < stringArr.length) {
+    var stringArr = toNumStringArray(someString.replace(/--/g, '+'));
+    var openBracket = stringArr.lastIndexOf('(');
+    
+    //locate last open bracket in array
+    while (openBracket < stringArr.length){
         //if there is no open bracket ie only one mathematical expression
         if (openBracket === -1) {
-            //do the math
             stringArr = performOperation(stringArr);
             return (stringArr[0]);
         }
         else {
-            //locate the next opening and closing brackets
-            var nextOpen = stringArr.indexOf('(', openBracket + 1);
+            //locate the next closing brackets
             var nextClose = stringArr.indexOf(')', openBracket + 1);
-            //check to see if current opening parentheses belongs to an inner bracket
-            if (nextClose < nextOpen || nextOpen === -1) {
-                //if yes, copy this bracket and do the math
-                var insideParentheses = stringArr.slice(openBracket + 1, nextClose);
-                var convertedBracket = (performOperation(insideParentheses));
-                //replace this bracket in the array with the total
-                stringArr.splice(openBracket, (nextClose - openBracket + 1), convertedBracket[0]);
-                //restart searching from the first opening bracket
-                openBracket = stringArr.indexOf('(');
-                stringArr = stringArr.join("");
-                stringArr = toNumStringArray(stringArr);
-            }
-            else {
-                //if not an inner bracket, go to next open parenthesis and restart 
-                openBracket = nextOpen;
-            }
+            var insideParentheses = stringArr.slice(openBracket + 1, nextClose);
+            var convertedBracket = performOperation(insideParentheses);
+            //replace this bracket in the array with the total
+            stringArr.splice(openBracket, (nextClose - openBracket + 1), convertedBracket[0]);
+            //find the new last open bracket
+            openBracket = stringArr.lastIndexOf('(');
+            stringArr = toNumStringArray(stringArr.join(''));
         }
-    }
+    } 
 }
 
-
+//math functions to perform single operations
 function powerOf(a, b){
     return Math.pow(a, b);
 }
@@ -57,7 +46,6 @@ function singleOperation(splitExpression, charParameter, operation){
     if (splitExpression.indexOf(charParameter) !== -1){
         //locate operator
         var index = splitExpression.indexOf(charParameter);
-        
         //perform given operation with numbers before and after operator
         var toReplace = (operation(splitExpression[index-1], splitExpression[index+1]));
         //splice new total into original split expression
@@ -67,78 +55,68 @@ function singleOperation(splitExpression, charParameter, operation){
 }
 
 //take a set of operations without brackets
-//everytime you do an operation, restart function until single number is left
+//recursive function to do operations until a single number is left
 function performOperation(splitExpression){
     //check first for power, highest precedence
-    if (splitExpression.indexOf("^") !== -1){
+    if (splitExpression.indexOf('^') !== -1){
         performOperation(singleOperation(splitExpression, '^', powerOf));
     }
     //next check for multiplication, and then div
-    else if (splitExpression.indexOf("*") !== -1) {
+    else if (splitExpression.indexOf('*') !== -1) {
         //if both mult and div, do whichever one is first
-        if (splitExpression.indexOf("/") !== -1){
-            if (splitExpression.indexOf("*") < splitExpression.indexOf("/")){
+        if (splitExpression.indexOf('/') !== -1){
+            if (splitExpression.indexOf('*') < splitExpression.indexOf('/')){
                 performOperation(singleOperation(splitExpression, '*', mult));
             } else {
                 performOperation(singleOperation(splitExpression, '/', div));
             }
         }
-         performOperation(singleOperation(splitExpression, '*', mult));
+        performOperation(singleOperation(splitExpression, '*', mult));
     }
-    else if (splitExpression.indexOf("/") !== -1){
+    else if (splitExpression.indexOf('/') !== -1){
         performOperation(singleOperation(splitExpression, '/', div));   
     }
     //after mult/div check for add
-    else if (splitExpression.indexOf("+") !== -1){
+    else if (splitExpression.indexOf('+') !== -1){
         performOperation(singleOperation(splitExpression, '+', add));
     }
     //if not operations are left, return total 
     return(splitExpression);
 }
 
-
-function stringNumbersToInt(curr) {
-    var newCurr = parseFloat(curr);
-    if (newCurr) {
-        return newCurr;
-    }
-    else return curr;
-}
-
-function noEmptyStrings(curr){
-    if (curr) {
-            return curr;
-        }
-}
-
 function toNumStringArray(someString) {
-    
-    var arr = someString.replace(/\s/g, "").split(/([\+\-\*\/\^\(\)])/);
+
+    //split on all operators incluing -
+    var arr = someString.split(/([\+\-\*\/\^\(\)])/);
 
     arr = arr.map(stringNumbersToInt);
-
+    
     arr = arr.filter(noEmptyStrings);
 
+    //replace - with +- where necessary
+    //similary replace ( and ) with * where necessary
     var i = 1;
     while (i < arr.length) {
-        if (arr[i] === "-") {
-            if (typeof arr[i - 1] === "number") {
-                arr[i] = "+-";
+        if (arr[i] === '-') {
+            if (typeof arr[i - 1] === 'number') {
+                arr[i] = '+-';
             }
         }
-        if (arr[i] === "(") {
-            if (typeof arr[i - 1] === "number") {
-                arr[i] = "*(";
+        if (arr[i] === '(') {
+            if (typeof arr[i - 1] === 'number') {
+                arr[i] = '*(';
             }
         }
-        if (arr[i] === ")") {
-            if (typeof arr[i + 1] === "number") {
-                arr[i] = ")*";
+        if (arr[i] === ')') {
+            if (typeof arr[i + 1] === 'number') {
+                arr[i] = ')*';
             }
         }
         i++;
     }
-    arr = arr.join("");
+    
+    arr = arr.join('');
+    //split on operators excluding -
     arr = arr.split(/([\+\*\/\^\(\)])/);
 
     arr = arr.filter(noEmptyStrings);
@@ -147,6 +125,21 @@ function toNumStringArray(someString) {
     
 }
 
+//map function to transform strings to numbers
+function stringNumbersToInt(curr) {
+    var newCurr = parseFloat(curr);
+    if (newCurr || newCurr === 0) {
+        return newCurr;
+    } 
+    else return curr;
+}
+
+//filter function to ensure no empty strings are in array
+function noEmptyStrings(curr){   
+    if (curr || curr === 0) {
+        return true;
+    } 
+}
 
 
 module.exports={

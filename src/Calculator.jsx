@@ -23,6 +23,8 @@ class Calculator extends React.Component {
             open: 0,
             close: 0      
         }
+        this.canAddOperator=false;
+        this.canAddNegative=true;
     }
     
     componentWillUnmount(){
@@ -32,87 +34,73 @@ class Calculator extends React.Component {
     handleKeydown(e){
         e.preventDefault();
         switch(e.which){
-            //0 and )
             case 48:
-                //close bracket
-                if(e.shiftKey === true){
+                if(e.shiftKey){
                     this.appendExpression(')');
                     return;
                 } else {
                     this.appendExpression('0');
                     return;
                 }
-            //1    
             case 49:
                 this.appendExpression('1');
                 return;
-            //2
             case 50:
                 this.appendExpression('2');
                 return;
-            //3
             case 51:
                 this.appendExpression('3');
                 return;
-            //4
             case 52:
                 this.appendExpression('4');
                 return;
-            //5
             case 53:
                 this.appendExpression('5');
                 return;
-            //6
             case 54:
-                this.appendExpression('6');
-                return;
-            //7
+                if(e.shiftKey){
+                    this.appendExpression('^');
+                    return;
+                } else {
+                    this.appendExpression('6');
+                    return;
+                }
             case 55:
                 this.appendExpression('7');
                 return;
-            //8 and *
             case 56: 
-                //multiply
-                if(e.shiftKey === true){
+                if(e.shiftKey){
                     this.appendExpression('*');
                     return;
                 } else {
                     this.appendExpression('8');
                     return;
                 }
-            //9 and (
             case 57:
-                //open bracket
-                if(e.shiftKey === true){
+                if(e.shiftKey){
                     this.appendExpression('(');
                     return;
                 } else {
                     this.appendExpression('9');
                     return;
                 }            
-            //enter leads to equal
             case 13:
                 this.calculateExpression();
                 return;
-            //= and +
             case 187:
-                //=
-                if(e.shiftKey === true){
+                if(e.shiftKey){
                     this.appendExpression('+');
                     return;
                 } else {
                     this.calculateExpression();
                     return;
                 }
-            //-
             case 189:
                 this.appendExpression('-');
                 return;
-            //division /
             case 191:
                 this.appendExpression('/');
                 return;
-            //backspace to clear
             case 8:
                 this.clearDisplay();
         }
@@ -131,13 +119,26 @@ class Calculator extends React.Component {
                     this.decimalAdded = true;
                 }
             } 
+            //if an operator is clicked, ensure that it is not following another operator
+            //exception for negative/minus sign
             else if(operators.indexOf(char) != -1){
                 if(char === '('){
                     this.bracketCounter.open++;
                 } else if (char === ')'){
                     this.bracketCounter.close++;
+                } else if (!this.canAddOperator){
+                    if(char === '-' && this.canAddNegative){
+                        this.canAddNegative = false;
+                    } else {
+                        return;
+                    }
                 }
-                this.decimalAdded = false;
+                this.canAddOperator=false; 
+                this.decimalAdded=false;
+            //if a number is added, can now enter an operator
+            } else {
+                this.canAddOperator=true;
+                this.canAddNegative=true;
             }
             var newDisplay = this.state.display+char;
             this.setState({display: newDisplay});
@@ -148,6 +149,8 @@ class Calculator extends React.Component {
         this.decimalAdded=false;
         this.bracketCounter.open=0;
         this.bracketCounter.close=0;
+        this.canAddOperator=false;
+        this.canAddNegative=true;        
         this.setState({display: ''});
     }
     
@@ -155,7 +158,14 @@ class Calculator extends React.Component {
         //check if expression entered is valid and balanced ie equal amount of open and close brackets
         if(this.bracketCounter.open === this.bracketCounter.close){
             var solution = calculate.calculator(this.state.display);
-            this.setState({display: solution});
+            console.log(solution)
+            if(solution || solution === 0){
+                this.canAddOperator=true;
+                this.canAddNegative=true;
+                this.setState({display: solution});
+            } else {
+                this.setState({display: "ERR"});
+            }
         } else {
             this.setState({display: "ERR"})
         }
