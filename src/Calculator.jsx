@@ -158,7 +158,6 @@ class Calculator extends React.Component {
         //check if expression entered is valid and balanced ie equal amount of open and close brackets
         if(this.bracketCounter.open === this.bracketCounter.close){
             var solution = calculate.calculator(this.state.display);
-            console.log(solution)
             if(solution || solution === 0){
                 this.canAddOperator=true;
                 this.canAddNegative=true;
