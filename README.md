@@ -8,8 +8,8 @@ Run **`npm run dev-server`**<br>
 Go to the local host specified, and open public (will most likely be **localhost:8080/public/**)<br>
 <br>
 ####About the calculator
-+Operators include +, -, /, *, ^, (, ).
-+Equations can be entered either by clicking calculator buttons or typing. Backspace maps to C, enter maps to '='.
-+Calculator does not allow you to enter invalid equation (ex cannot enter multiple operators in a row).
+* Operators include +, -, /, *, ^, (, ).
+* Equations can be entered either by clicking calculator buttons or typing. Backspace maps to C, enter maps to '='.
+* Calculator does not allow you to enter invalid equation (ex cannot enter multiple operators in a row).
 
 
