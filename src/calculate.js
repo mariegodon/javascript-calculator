@@ -2,7 +2,7 @@ function calculator(someString) {
 
     var stringArr = toNumStringArray(someString.replace(/--/g, '+'));
     var openBracket = stringArr.lastIndexOf('(');
-    
+
     //locate last open bracket in array
     while (openBracket < stringArr.length){
         //if there is no open bracket ie only one mathematical expression

@@ -195,14 +195,20 @@
 	                    } else {
 	                        this.decimalAdded = true;
 	                    }
+	                } else if (char === ')') {
+	                    if (this.canAddOperator) {
+	                        this.bracketCounter.close++;
+	                        this.decimalAdded = false;
+	                        this.canAddNegative = true;
+	                    } else {
+	                        return;
+	                    }
 	                }
 	                //if an operator is clicked, ensure that it is not following another operator
 	                //exception for negative/minus sign
 	                else if (operators.indexOf(char) != -1) {
 	                        if (char === '(') {
 	                            this.bracketCounter.open++;
-	                        } else if (char === ')') {
-	                            this.bracketCounter.close++;
 	                        } else if (!this.canAddOperator) {
 	                            if (char === '-' && this.canAddNegative) {
 	                                this.canAddNegative = false;
